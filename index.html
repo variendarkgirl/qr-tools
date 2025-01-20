@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator & Scanner</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-3xl font-bold text-center mb-8">QR Code Generator & Scanner</h1>
+        
+        <!-- Tab buttons -->
+        <div class="flex mb-6">
+            <button onclick="showTab('generate')" id="generateTab" class="flex-1 py-2 px-4 bg-blue-500 text-white rounded-l">Generate QR</button>
+            <button onclick="showTab('scan')" id="scanTab" class="flex-1 py-2 px-4 bg-gray-200 rounded-r">Scan QR</button>
+        </div>
+
+        <!-- Generate QR Section -->
+        <div id="generateSection" class="space-y-4">
+            <div class="flex space-x-2">
+                <input type="text" id="urlInput" placeholder="Enter URL or text" 
+                    class="flex-1 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button onclick="generateQR()" 
+                    class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    Generate
+                </button>
+            </div>
+            <div id="qrOutput" class="flex justify-center"></div>
+        </div>
+
+        <!-- Scan QR Section -->
+        <div id="scanSection" class="hidden space-y-4">
+            <!-- Camera Scanner -->
+            <div class="mb-6">
+                <h3 class="font-semibold mb-2">Scan with Camera</h3>
+                <div id="reader"></div>
+            </div>
+
+            <!-- Image Upload -->
+            <div class="border-t pt-6">
+                <h3 class="font-semibold mb-2">Upload QR Code Image</h3>
+                <div class="space-y-4">
+                    <input type="file" 
+                           id="qrInput" 
+                           accept="image/*" 
+                           class="block w-full text-sm text-gray-500
+                                  file:mr-4 file:py-2 file:px-4
+                                  file:rounded-full file:border-0
+                                  file:text-sm file:font-semibold
+                                  file:bg-blue-50 file:text-blue-700
+                                  hover:file:bg-blue-100"
+                    >
+                    <div id="imagePreview" class="hidden mt-4">
+                        <p class="text-sm text-gray-600 mb-2">Uploaded Image:</p>
+                        <img id="previewImg" class="max-w-full h-auto rounded border" alt="Preview">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="scanResult" class="mt-4 p-4 bg-gray-100 rounded hidden">
+                <p class="font-semibold">Scanned Result:</p>
+                <p id="result" class="break-all"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let html5QrcodeScanner = null;
+
+        function showTab(tab) {
+            document.getElementById('generateTab').className = 
+                tab === 'generate' ? 'flex-1 py-2 px-4 bg-blue-500 text-white rounded-l' : 'flex-1 py-2 px-4 bg-gray-200 rounded-l';
+            document.getElementById('scanTab').className = 
+                tab === 'scan' ? 'flex-1 py-2 px-4 bg-blue-500 text-white rounded-r' : 'flex-1 py-2 px-4 bg-gray-200 rounded-r';
+            
+            document.getElementById('generateSection').style.display = tab === 'generate' ? 'block' : 'none';
+            document.getElementById('scanSection').style.display = tab === 'scan' ? 'block' : 'none';
+
+            if (tab === 'scan' && !html5QrcodeScanner) {
+                initializeScanner();
+            }
+        }
+
+        function generateQR() {
+            const url = document.getElementById('urlInput').value;
+            if (!url) {
+                alert('Please enter a URL or text');
+                return;
+            }
+
+            const qrOutput = document.getElementById('qrOutput');
+            qrOutput.innerHTML = '';
+            
+            new QRCode(qrOutput, {
+                text: url,
+                width: 256,
+                height: 256,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function initializeScanner() {
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            html5QrcodeScanner.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                    experimentalFeatures: {
+                        useBarCodeDetectorIfSupported: true
+                    }
+                },
+                (decodedText) => {
+                    showResult(decodedText);
+                },
+                (errorMessage) => {
+                    // Handle errors silently
+                }
+            ).catch((err) => {
+                console.error("Error starting scanner:", err);
+            });
+
+            // Initialize file input handler
+            document.getElementById('qrInput').addEventListener('change', handleImageUpload);
+        }
+
+        async function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Show image preview
+            const preview = document.getElementById('previewImg');
+            const previewContainer = document.getElementById('imagePreview');
+            preview.src = URL.createObjectURL(file);
+            previewContainer.classList.remove('hidden');
+
+            try {
+                // Create new HTML5 QR code instance for file scanning
+                const html5QrCode = new Html5Qrcode("reader");
+                
+                const result = await html5QrCode.scanFile(file, true);
+                showResult(result);
+                
+            } catch (error) {
+                console.error("Error scanning file:", error);
+                alert("Could not find a QR code in this image. Please try another image.");
+            }
+        }
+
+        function showResult(decodedText) {
+            document.getElementById('scanResult').style.display = 'block';
+            document.getElementById('result').textContent = decodedText;
+        }
+
+        // Clean up scanner when switching tabs
+        document.getElementById('generateTab').addEventListener('click', () => {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().catch(console.error);
+                html5QrcodeScanner = null;
+            }
+        });
+    </script>
+</body>
+</html>
