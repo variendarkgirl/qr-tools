@@ -3,99 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Generator & Scanner</title>
+    <title>QR Code Tools</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(to bottom right, #0a192f, #112240);
+            color: #64ffda;
+        }
+        .cyber-input {
+            background: rgba(10, 25, 47, 0.7);
+            border: 1px solid #64ffda;
+            color: #64ffda;
+        }
+        .cyber-input:focus {
+            box-shadow: 0 0 10px #64ffda;
+            outline: none;
+        }
+        .cyber-button {
+            background: transparent;
+            border: 1px solid #64ffda;
+            color: #64ffda;
+            transition: all 0.3s ease;
+        }
+        .cyber-button:hover {
+            background: rgba(100, 255, 218, 0.1);
+            box-shadow: 0 0 15px rgba(100, 255, 218, 0.5);
+        }
+        .cyber-button.active {
+            background: #64ffda;
+            color: #0a192f;
+        }
+        .cyber-table td {
+            border-color: rgba(100, 255, 218, 0.2);
+            background: rgba(10, 25, 47, 0.7);
+        }
+        .cyber-table td.header {
+            background: rgba(100, 255, 218, 0.1);
+        }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen p-4">
-    <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
-        <h1 class="text-3xl font-bold text-center mb-8">QR Code Tools</h1>
+<body class="min-h-screen p-4">
+    <div class="max-w-3xl mx-auto bg-[#112240] rounded-lg shadow-2xl p-6 border border-[#64ffda]">
+        <h1 class="text-3xl font-bold text-center mb-8 text-[#64ffda]">QR Code Tools</h1>
         
         <!-- Tab buttons -->
-        <div class="flex mb-6">
+        <div class="flex mb-6 gap-2">
             <button onclick="showTab('generate')" id="generateTab" 
-                    class="flex-1 py-2 px-4 bg-blue-500 text-white rounded-l">
+                    class="flex-1 py-2 px-4 rounded cyber-button active">
                 Generate QR
             </button>
             <button onclick="showTab('scan')" id="scanTab" 
-                    class="flex-1 py-2 px-4 bg-gray-200 rounded-r">
+                    class="flex-1 py-2 px-4 rounded cyber-button">
                 Scan QR
             </button>
         </div>
 
         <!-- Generate Section -->
         <div id="generateSection" class="space-y-4">
-            <div class="flex space-x-2">
-                <input type="text" id="urlInput" placeholder="Enter URL or text" 
-                       class="flex-1 p-2 border rounded">
-                <button onclick="generateQR()" 
-                        class="px-4 py-2 bg-blue-500 text-white rounded">
-                    Generate
-                </button>
-            </div>
-            <div id="qrOutput" class="flex justify-center"></div>
+            <input type="text" id="urlInput" 
+                   placeholder="Enter URL or text" 
+                   class="w-full p-3 rounded cyber-input"
+                   oninput="generateQRRealtime()">
+            <div id="qrOutput" class="flex justify-center p-4"></div>
         </div>
 
         <!-- Scan Section -->
         <div id="scanSection" class="hidden space-y-4">
-            <!-- File Input -->
             <div class="mb-4">
                 <input type="file" 
                        id="qrInput" 
                        accept="image/*" 
-                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                       class="block w-full text-sm cyber-input p-2 rounded">
             </div>
 
-            <!-- Camera Reader -->
-            <div id="reader" class="mb-4"></div>
+            <div id="reader" class="mb-4 bg-[#0a192f] rounded"></div>
 
             <!-- Results Table -->
             <div id="scanResult" class="mt-4 hidden">
-                <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-4">
-                    <p class="font-bold text-green-700">Decode Succeeded</p>
+                <div class="bg-[#112240] border-l-4 border-[#64ffda] p-4 mb-4">
+                    <p class="font-bold text-[#64ffda]">Decode Succeeded</p>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full border-collapse bg-white">
+                    <table class="w-full border-collapse cyber-table">
                         <tbody>
                             <tr>
-                                <td class="border p-3 bg-gray-50 font-medium w-1/3">Raw text</td>
-                                <td id="rawText" class="border p-3"></td>
+                                <td class="p-3 header w-1/3">Raw text</td>
+                                <td id="rawText" class="p-3"></td>
                             </tr>
                             <tr>
-                                <td class="border p-3 bg-gray-50 font-medium">Raw bytes</td>
-                                <td id="rawBytes" class="border p-3 font-mono text-sm break-all"></td>
+                                <td class="p-3 header">Raw bytes</td>
+                                <td id="rawBytes" class="p-3 font-mono text-sm break-all"></td>
                             </tr>
                             <tr>
-                                <td class="border p-3 bg-gray-50 font-medium">Barcode format</td>
-                                <td id="barcodeFormat" class="border p-3">QR_CODE</td>
+                                <td class="p-3 header">Barcode format</td>
+                                <td id="barcodeFormat" class="p-3">QR_CODE</td>
                             </tr>
                             <tr>
-                                <td class="border p-3 bg-gray-50 font-medium">Parsed Result Type</td>
-                                <td id="parsedResultType" class="border p-3"></td>
+                                <td class="p-3 header">Parsed Result Type</td>
+                                <td id="parsedResultType" class="p-3"></td>
                             </tr>
                             <tr>
-                                <td class="border p-3 bg-gray-50 font-medium">Parsed Result</td>
-                                <td id="parsedResult" class="border p-3 whitespace-pre-line"></td>
+                                <td class="p-3 header">Parsed Result</td>
+                                <td id="parsedResult" class="p-3 whitespace-pre-line"></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
+                <button onclick="resetScanner()" 
+                        class="mt-4 w-full p-2 rounded cyber-button">
+                    Scan Another QR Code
+                </button>
             </div>
         </div>
     </div>
 
     <script>
         let html5QrcodeScanner = null;
+        let qrcode = null;
 
         function showTab(tab) {
-            // Update tab buttons
             document.getElementById('generateTab').className = 
-                tab === 'generate' ? 'flex-1 py-2 px-4 bg-blue-500 text-white rounded-l' : 'flex-1 py-2 px-4 bg-gray-200 rounded-l';
+                tab === 'generate' ? 'flex-1 py-2 px-4 rounded cyber-button active' : 'flex-1 py-2 px-4 rounded cyber-button';
             document.getElementById('scanTab').className = 
-                tab === 'scan' ? 'flex-1 py-2 px-4 bg-blue-500 text-white rounded-r' : 'flex-1 py-2 px-4 bg-gray-200 rounded-r';
+                tab === 'scan' ? 'flex-1 py-2 px-4 rounded cyber-button active' : 'flex-1 py-2 px-4 rounded cyber-button';
             
-            // Show/hide sections
             document.getElementById('generateSection').style.display = tab === 'generate' ? 'block' : 'none';
             document.getElementById('scanSection').style.display = tab === 'scan' ? 'block' : 'none';
 
@@ -107,22 +140,20 @@
             }
         }
 
-        function generateQR() {
+        function generateQRRealtime() {
             const text = document.getElementById('urlInput').value;
-            if (!text) {
-                alert('Please enter a URL or text');
-                return;
-            }
-
             const qrOutput = document.getElementById('qrOutput');
             qrOutput.innerHTML = '';
             
-            new QRCode(qrOutput, {
+            if (!text) return;
+
+            if (qrcode) qrcode.clear();
+            qrcode = new QRCode(qrOutput, {
                 text: text,
                 width: 256,
                 height: 256,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
+                colorDark: "#64ffda",
+                colorLight: "#0a192f",
                 correctLevel: QRCode.CorrectLevel.H
             });
         }
@@ -131,11 +162,9 @@
             if (html5QrcodeScanner) return;
 
             html5QrcodeScanner = new Html5Qrcode("reader");
-            
-            // Setup file input handler
             document.getElementById('qrInput').addEventListener('change', handleFileUpload);
+            document.getElementById('scanResult').classList.add('hidden');
 
-            // Start camera scanner
             html5QrcodeScanner.start(
                 { facingMode: "environment" },
                 {
@@ -145,6 +174,12 @@
                 handleScanSuccess,
                 handleScanError
             ).catch(console.error);
+        }
+
+        function resetScanner() {
+            document.getElementById('scanResult').classList.add('hidden');
+            document.getElementById('qrInput').value = '';
+            initializeScanner();
         }
 
         async function handleFileUpload(e) {
@@ -161,13 +196,16 @@
         }
 
         function handleScanSuccess(decodedText) {
-            // Convert text to bytes
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().catch(console.error);
+                html5QrcodeScanner = null;
+            }
+
             const encoder = new TextEncoder();
             const bytes = encoder.encode(decodedText);
             const bytesHex = Array.from(bytes).map(b => 
                 b.toString(16).padStart(2, '0')).join(' ');
 
-            // Determine result type
             let resultType = 'TEXT';
             let parsedResult = decodedText;
 
@@ -176,7 +214,6 @@
                 parsedResult = parseWifiString(decodedText);
             }
 
-            // Update display
             document.getElementById('scanResult').classList.remove('hidden');
             document.getElementById('rawText').textContent = decodedText;
             document.getElementById('rawBytes').textContent = bytesHex;
@@ -185,7 +222,6 @@
         }
 
         function handleScanError(error) {
-            // Silent error handling for continuous scanning
             console.debug('QR scan error:', error);
         }
 
