@@ -11,6 +11,9 @@
         body {
             background: linear-gradient(to bottom right, #0a192f, #112240);
             color: #64ffda;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         .cyber-input {
             background: rgba(10, 25, 47, 0.7);
@@ -42,10 +45,70 @@
         .cyber-table td.header {
             background: rgba(100, 255, 218, 0.1);
         }
+        #reader video {
+            max-width: 100%;
+            border: 1px solid #64ffda;
+            border-radius: 0.375rem;
+        }
+        #reader {
+            width: 100% !important;
+        }
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+        .file-input-button {
+            display: block;
+            padding: 0.5rem 1rem;
+            width: 100%;
+            text-align: center;
+            background-color: rgba(10, 25, 47, 0.7);
+            border: 1px solid #64ffda;
+            color: #64ffda;
+            transition: all 0.3s ease;
+        }
+        .file-input-button:hover {
+            background: rgba(100, 255, 218, 0.1);
+            box-shadow: 0 0 15px rgba(100, 255, 218, 0.5);
+        }
+        
+        /* New footer styles */
+        .shining-footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 1rem;
+            font-family: 'Arial', sans-serif;
+            font-weight: bold;
+            animation: colorChange 5s infinite;
+            background: rgba(10, 25, 47, 0.9);
+            border-top: 1px solid rgba(100, 255, 218, 0.3);
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        @keyframes colorChange {
+            0% { color: #64ffda; }
+            20% { color: #ff6b6b; }
+            40% { color: #4ecdc4; }
+            60% { color: #ffbe0b; }
+            80% { color: #ff006e; }
+            100% { color: #64ffda; }
+        }
     </style>
 </head>
-<body class="min-h-screen p-4">
-    <div class="max-w-3xl mx-auto bg-[#112240] rounded-lg shadow-2xl p-6 border border-[#64ffda]">
+<body>
+    <div class="max-w-3xl mx-auto bg-[#112240] rounded-lg shadow-2xl p-6 border border-[#64ffda] mb-8">
+        <!-- Previous content remains the same -->
         <h1 class="text-3xl font-bold text-center mb-8 text-[#64ffda]">QR Code Tools</h1>
         
         <!-- Tab buttons -->
@@ -62,20 +125,30 @@
 
         <!-- Generate Section -->
         <div id="generateSection" class="space-y-4">
-            <input type="text" id="urlInput" 
-                   placeholder="Enter URL or text" 
-                   class="w-full p-3 rounded cyber-input"
-                   oninput="generateQRRealtime()">
-            <div id="qrOutput" class="flex justify-center p-4"></div>
+            <div class="flex space-x-2">
+                <input type="text" id="urlInput" 
+                       placeholder="Enter URL or text" 
+                       class="flex-1 p-3 rounded cyber-input" 
+                       oninput="generateQR()">
+                <button onclick="generateQR()" 
+                        class="px-6 py-2 rounded cyber-button">
+                    Generate
+                </button>
+            </div>
+            <div id="qrOutput" class="flex justify-center p-4 bg-white rounded-lg"></div>
         </div>
 
         <!-- Scan Section -->
         <div id="scanSection" class="hidden space-y-4">
-            <div class="mb-4">
+            <!-- File Input -->
+            <div class="file-input-wrapper mb-4">
+                <button class="cyber-button rounded file-input-button">
+                    Upload QR Code Image
+                </button>
                 <input type="file" 
                        id="qrInput" 
                        accept="image/*" 
-                       class="block w-full text-sm cyber-input p-2 rounded">
+                       class="cyber-input">
             </div>
 
             <div id="reader" class="mb-4 bg-[#0a192f] rounded"></div>
@@ -119,9 +192,16 @@
         </div>
     </div>
 
+    <!-- New Footer -->
+    <footer class="shining-footer">
+        <p>Developed by @vareindarkgirl</p>
+        <p>Coauthored by @Str1k3r0p</p>
+        <p>&copy; 2025 All Rights Reserved</p>
+    </footer>
+
+    <!-- Previous script remains the same -->
     <script>
         let html5QrcodeScanner = null;
-        let qrcode = null;
 
         function showTab(tab) {
             document.getElementById('generateTab').className = 
@@ -140,28 +220,28 @@
             }
         }
 
-        function generateQRRealtime() {
+        function generateQR() {
             const text = document.getElementById('urlInput').value;
             const qrOutput = document.getElementById('qrOutput');
             qrOutput.innerHTML = '';
-            
-            if (!text) return;
 
-            if (qrcode) qrcode.clear();
-            qrcode = new QRCode(qrOutput, {
-                text: text,
-                width: 256,
-                height: 256,
-                colorDark: "#64ffda",
-                colorLight: "#0a192f",
-                correctLevel: QRCode.CorrectLevel.H
-            });
+            if (text) {
+                new QRCode(qrOutput, {
+                    text: text,
+                    width: 256,
+                    height: 256,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }
         }
 
         function initializeScanner() {
             if (html5QrcodeScanner) return;
 
             html5QrcodeScanner = new Html5Qrcode("reader");
+            
             document.getElementById('qrInput').addEventListener('change', handleFileUpload);
             document.getElementById('scanResult').classList.add('hidden');
 
@@ -176,12 +256,6 @@
             ).catch(console.error);
         }
 
-        function resetScanner() {
-            document.getElementById('scanResult').classList.add('hidden');
-            document.getElementById('qrInput').value = '';
-            initializeScanner();
-        }
-
         async function handleFileUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -189,18 +263,20 @@
             try {
                 const result = await html5QrcodeScanner.scanFile(file, true);
                 handleScanSuccess(result);
+                document.getElementById('qrInput').value = '';
             } catch (error) {
                 console.error("Error scanning file:", error);
                 alert("Could not find a QR code in this image.");
             }
         }
 
-        function handleScanSuccess(decodedText) {
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.stop().catch(console.error);
-                html5QrcodeScanner = null;
-            }
+        function resetScanner() {
+            document.getElementById('scanResult').classList.add('hidden');
+            document.getElementById('qrInput').value = '';
+            initializeScanner();
+        }
 
+        function handleScanSuccess(decodedText) {
             const encoder = new TextEncoder();
             const bytes = encoder.encode(decodedText);
             const bytesHex = Array.from(bytes).map(b => 
