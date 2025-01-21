@@ -27,12 +27,12 @@ Create and scan QR codes instantly in your browser with our powerful, lightweigh
 - Clean, crisp output
 - One-click download
 
-### 📱 QR Code Scanning
+### 📱 QR Code decoding.
 - Multiple scanning methods:
   - Live camera scanning
   - Image upload support
   - Batch processing capability
-- Advanced decoding features:
+  - Advanced decoding features:
   - Auto-focus and zoom
   - Error correction
   - Multiple format support
@@ -46,7 +46,7 @@ Create and scan QR codes instantly in your browser with our powerful, lightweigh
 3. Enter your content
 4. Download or share your QR code
 
-### Scan QR Codes Instantly
+### Decode QR Codes Instantly
 1. Switch to "Scan QR"
 2. Choose your preferred method:
    - 📸 Use your device's camera
@@ -63,7 +63,7 @@ Create and scan QR codes instantly in your browser with our powerful, lightweigh
 - **Deployment**: GitHub Pages for reliable hosting
 
 ### Browser Support
-- ✅ Chrome (Recommended)
+- ✅ Chrome 
 - ✅ Firefox
 - ✅ Safari
 - ✅ Edge
