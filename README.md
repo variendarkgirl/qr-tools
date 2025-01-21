@@ -1,4 +1,4 @@
-# QR Tools - Free Online QR Code Generator & Scanner
+# QR Tools - Free Online QR Code Generator || QR Code Decoder
 
 [![Live Demo](https://img.shields.io/badge/Demo-Live%20Website-blue.svg)](#) [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](#) [![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen.svg)](#)
 
