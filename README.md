@@ -28,7 +28,7 @@ Create and scan QR codes instantly in your browser with our powerful, lightweigh
 - One-click download
 
 ### 📱 QR Code decoding.
-- Multiple scanning methods:
+  - Multiple scanning methods to decode the QR code:
   - Live camera scanning
   - Image upload support
   - Batch processing capability
@@ -47,7 +47,7 @@ Create and scan QR codes instantly in your browser with our powerful, lightweigh
 4. Download or share your QR code
 
 ### Decode QR Codes Instantly
-1. Switch to "Scan QR"
+1. Switch to "Decode QR"
 2. Choose your preferred method:
    - 📸 Use your device's camera
    - 📤 Upload an image file
@@ -61,29 +61,6 @@ Create and scan QR codes instantly in your browser with our powerful, lightweigh
 - **QR Generation**: qrcode.js library
 - **QR Scanning**: html5-qrcode with advanced features
 - **Deployment**: GitHub Pages for reliable hosting
-
-### Browser Support
-- ✅ Chrome 
-- ✅ Firefox
-- ✅ Safari
-- ✅ Edge
-- ✅ Opera
-- ✅ Mobile Browsers
-
-## 🛠️ Development Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/variendarkgirl/qr-tools.git
-
-# Navigate to project directory
-cd qr-tools
-
-# Serve locally (using Python for example)
-python -m http.server 8000
-
-# Or use any other local server of your choice
-```
 
 ## 🤝 Contributing
 
