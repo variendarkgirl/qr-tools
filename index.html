@@ -11,6 +11,9 @@
         body {
             background: linear-gradient(to bottom right, #0a192f, #112240);
             color: #64ffda;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         .cyber-input {
             background: rgba(10, 25, 47, 0.7);
@@ -79,10 +82,33 @@
             background: rgba(100, 255, 218, 0.1);
             box-shadow: 0 0 15px rgba(100, 255, 218, 0.5);
         }
+        
+        /* New footer styles */
+        .shining-footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 1rem;
+            font-family: 'Arial', sans-serif;
+            font-weight: bold;
+            animation: colorChange 5s infinite;
+            background: rgba(10, 25, 47, 0.9);
+            border-top: 1px solid rgba(100, 255, 218, 0.3);
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        @keyframes colorChange {
+            0% { color: #64ffda; }
+            20% { color: #ff6b6b; }
+            40% { color: #4ecdc4; }
+            60% { color: #ffbe0b; }
+            80% { color: #ff006e; }
+            100% { color: #64ffda; }
+        }
     </style>
 </head>
-<body class="min-h-screen p-4">
-    <div class="max-w-3xl mx-auto bg-[#112240] rounded-lg shadow-2xl p-6 border border-[#64ffda]">
+<body>
+    <div class="max-w-3xl mx-auto bg-[#112240] rounded-lg shadow-2xl p-6 border border-[#64ffda] mb-8">
+        <!-- Previous content remains the same -->
         <h1 class="text-3xl font-bold text-center mb-8 text-[#64ffda]">QR Code Tools</h1>
         
         <!-- Tab buttons -->
@@ -166,6 +192,14 @@
         </div>
     </div>
 
+    <!-- New Footer -->
+    <footer class="shining-footer">
+        <p>Developed by @vareindarkgirl</p>
+        <p>Coauthored by @Str1k3r0p</p>
+        <p>&copy; 2025 All Rights Reserved</p>
+    </footer>
+
+    <!-- Previous script remains the same -->
     <script>
         let html5QrcodeScanner = null;
 
@@ -196,8 +230,8 @@
                     text: text,
                     width: 256,
                     height: 256,
-                    colorDark: "#000000",  // Black foreground for QR code
-                    colorLight: "#ffffff",  // White background for QR code
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
                     correctLevel: QRCode.CorrectLevel.H
                 });
             }
@@ -208,7 +242,6 @@
 
             html5QrcodeScanner = new Html5Qrcode("reader");
             
-            // Setup file input handler
             document.getElementById('qrInput').addEventListener('change', handleFileUpload);
             document.getElementById('scanResult').classList.add('hidden');
 
@@ -230,8 +263,7 @@
             try {
                 const result = await html5QrcodeScanner.scanFile(file, true);
                 handleScanSuccess(result);
-                // Hide the file input after submission
-                document.getElementById('qrInput').value = ''; // Clear input
+                document.getElementById('qrInput').value = '';
             } catch (error) {
                 console.error("Error scanning file:", error);
                 alert("Could not find a QR code in this image.");
