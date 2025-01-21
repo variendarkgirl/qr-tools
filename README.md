@@ -104,12 +104,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 - **Lead Developer**: [@variendarkgirl](https://github.com/variendarkgirl)
 - **Co-author**: [@Str1k3r0p](https://github.com/Str1k3r0p)
 
-## 🌟 Acknowledgments
-
-- [html5-qrcode](https://github.com/mebjas/html5-qrcode) for scanning functionality
-- [qrcodejs](https://github.com/davidshimjs/qrcodejs) for QR generation
-- [Tailwind CSS](https://tailwindcss.com) for styling
-
 ## 📞 Support & Contact
 
 Having trouble? We're here to help!
@@ -120,7 +114,8 @@ Having trouble? We're here to help!
 
 ---
 
-<p align="center">Made with ❤️ by <a href="https://github.com/variendarkgirl">@variendarkgirl</a></p>
+<p align="center">Developed with 💻 by <a href="https://github.com/variendarkgirl">@variendarkgirl</a></p>
+<p align="center">Powered up with ⚡ by <a href="https://github.com/Str1k3r0p">@Str1k3r0p</a></p>
 
 <p align="center">
   <a href="https://variendarkgirl.github.io/qr-tools/">Website</a> •
