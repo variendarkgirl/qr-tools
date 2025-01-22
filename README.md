@@ -57,10 +57,8 @@ Create and scan QR codes instantly in your browser with our powerful, lightweigh
 
 ### Built With
 - **Frontend Framework**: Vanilla JavaScript for lightweight performance
-- **Styling**: Tailwind CSS for modern, responsive design
 - **QR Generation**: qrcode.js library
 - **QR Scanning**: html5-qrcode with advanced features
-- **Deployment**: GitHub Pages for reliable hosting
 
 ## 🤝 Contributing
 
@@ -68,8 +66,8 @@ Contributions make the open-source community amazing! Any contributions you make
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some Feature'`)
+4. Push to the Branch (`git push origin feature/Feature`)
 5. Open a Pull Request
 
 ## 📝 License
