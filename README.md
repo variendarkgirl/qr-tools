@@ -79,7 +79,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 - **Lead Developer**: [@variendarkgirl](https://github.com/variendarkgirl)
 - **Co-author**: [@Str1k3r0p](https://github.com/Str1k3r0p)
 
-## 📞 Support & Contact
+## 📞 Support & Contact 
 
 Having trouble? We're here to help!
 
