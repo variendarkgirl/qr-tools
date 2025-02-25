@@ -1,223 +1,529 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Previous head content remains same -->
-    <!-- Add new dependencies -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Toolkit Pro</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #64ffda;
+            --background: #0a192f;
+            --secondary: #112240;
+        }
+
+        body {
+            background: linear-gradient(to bottom right, var(--background), var(--secondary));
+            color: var(--primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cyber-input {
+            background: rgba(10, 25, 47, 0.7);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .cyber-input:focus {
+            box-shadow: 0 0 10px var(--primary);
+            outline: none;
+        }
+
+        .cyber-button {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .cyber-button:hover {
+            background: rgba(100, 255, 218, 0.1);
+            box-shadow: 0 0 15px rgba(100, 255, 218, 0.5);
+        }
+
+        .cyber-button.active {
+            background: var(--primary);
+            color: var(--background);
+        }
+
+        #qrOutput canvas {
+            image-rendering: crisp-edges;
+        }
+
+        .history-item {
+            transition: transform 0.2s ease;
+        }
+
+        .history-item:hover {
+            transform: translateY(-3px);
+        }
+
+        #loadingSpinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        .parsed-result-item {
+            border-left: 3px solid var(--primary);
+            padding-left: 1rem;
+            margin: 0.5rem 0;
+        }
+    </style>
 </head>
 <body>
-    <div class="max-w-3xl mx-auto bg-[#112240] rounded-lg shadow-2xl p-6 border border-[#64ffda] mb-8">
-        <!-- Add new controls in generate section -->
-        <div id="generateSection" class="space-y-4">
-            <div class="flex space-x-2">
-                <input type="text" id="urlInput" 
-                       placeholder="Enter URL or text" 
-                       class="flex-1 p-3 rounded cyber-input" 
-                       oninput="generateQR()">
-                <button onclick="generateQR()" 
-                        class="px-6 py-2 rounded cyber-button">
-                    Generate
+    <div class="max-w-4xl mx-auto p-4">
+        <div class="bg-[#112240] rounded-xl shadow-2xl p-6 border border-[#64ffda] mb-8">
+            <h1 class="text-4xl font-bold text-center mb-8 text-[#64ffda] animate-pulse">
+                <i class="fas fa-qrcode mr-3"></i>QR Toolkit Pro
+            </h1>
+
+            <!-- Tab Navigation -->
+            <div class="flex mb-6 gap-2">
+                <button onclick="showTab('generate')" id="generateTab" 
+                        class="flex-1 py-3 px-6 rounded-lg cyber-button active">
+                    <i class="fas fa-qrcode mr-2"></i>Generate
                 </button>
-            </div>
-            
-            <!-- New customization options -->
-            <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label class="text-[#64ffda]">QR Code Color</label>
-                    <input type="color" id="qrColor" value="#000000" 
-                           class="w-full h-10 rounded cyber-input">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-[#64ffda]">Background Color</label>
-                    <input type="color" id="bgColor" value="#ffffff" 
-                           class="w-full h-10 rounded cyber-input">
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label class="text-[#64ffda]">Error Correction</label>
-                    <select id="errorCorrection" class="w-full p-2 rounded cyber-input">
-                        <option value="L">Low (7%)</option>
-                        <option value="M">Medium (15%)</option>
-                        <option value="Q">Quartile (25%)</option>
-                        <option value="H" selected>High (30%)</option>
-                    </select>
-                </div>
-                <div class="space-y-2">
-                    <label class="text-[#64ffda]">Add Logo</label>
-                    <input type="file" id="logoUpload" accept="image/*" 
-                           class="w-full p-2 rounded cyber-input">
-                </div>
-            </div>
-
-            <div id="qrOutput" class="flex flex-col items-center p-4 bg-white rounded-lg relative">
-                <div id="loadingSpinner" class="hidden absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#64ffda]"></div>
-                </div>
-            </div>
-
-            <!-- New download buttons -->
-            <div class="flex gap-2">
-                <button onclick="downloadQR('png')" 
-                        class="flex-1 py-2 px-4 rounded cyber-button">
-                    <i class="fas fa-download mr-2"></i>PNG
-                </button>
-                <button onclick="downloadQR('svg')" 
-                        class="flex-1 py-2 px-4 rounded cyber-button">
-                    <i class="fas fa-download mr-2"></i>SVG
+                <button onclick="showTab('scan')" id="scanTab" 
+                        class="flex-1 py-3 px-6 rounded-lg cyber-button">
+                    <i class="fas fa-camera mr-2"></i>Scan
                 </button>
             </div>
 
-            <!-- QR History -->
-            <div class="mt-4 border-t border-[#64ffda]/20 pt-4">
-                <h3 class="text-[#64ffda] mb-2">Recent QRs</h3>
-                <div id="qrHistory" class="grid grid-cols-4 gap-2"></div>
-            </div>
-        </div>
+            <!-- Generate Section -->
+            <div id="generateSection" class="space-y-6">
+                <div class="flex gap-4">
+                    <input type="text" id="urlInput" 
+                           placeholder="Enter text, URL, or contact info..." 
+                           class="flex-1 p-4 rounded-xl cyber-input"
+                           autocomplete="off">
+                    <button onclick="generateQR()" 
+                            class="px-8 py-4 rounded-xl cyber-button">
+                        <i class="fas fa-magic mr-2"></i>Generate
+                    </button>
+                </div>
 
-        <!-- Enhanced scan section -->
-        <div id="scanSection" class="hidden space-y-4">
-            <!-- Previous scan content remains -->
-            <!-- Enhanced results display -->
-            <div id="parsedResult" class="p-3 whitespace-pre-line">
-                <!-- Dynamic content will be inserted here -->
+                <!-- Customization Options -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium">QR Color</label>
+                        <input type="color" id="qrColor" value="#000000" 
+                               class="w-full h-12 rounded-lg cyber-input">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium">Background</label>
+                        <input type="color" id="bgColor" value="#ffffff" 
+                               class="w-full h-12 rounded-lg cyber-input">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium">Error Correction</label>
+                        <select id="errorCorrection" class="w-full p-3 rounded-lg cyber-input">
+                            <option value="L">Low (7%)</option>
+                            <option value="M">Medium (15%)</option>
+                            <option value="Q">Quartile (25%)</option>
+                            <option value="H" selected>High (30%)</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium">Add Logo</label>
+                        <input type="file" id="logoUpload" accept="image/*" 
+                               class="w-full p-2 rounded-lg cyber-input">
+                    </div>
+                </div>
+
+                <!-- QR Display Area -->
+                <div id="qrOutput" class="relative bg-white rounded-xl p-4 shadow-lg">
+                    <div id="loadingSpinner" 
+                         class="hidden absolute inset-0 bg-black/50 flex items-center justify-center rounded-xl">
+                        <div class="animate-spin rounded-full h-12 w-12 border-4 border-t-transparent border-[#64ffda]"></div>
+                    </div>
+                </div>
+
+                <!-- Output Actions -->
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="downloadQR('png')" 
+                            class="py-3 rounded-xl cyber-button">
+                        <i class="fas fa-file-image mr-2"></i>Download PNG
+                    </button>
+                    <button onclick="downloadQR('svg')" 
+                            class="py-3 rounded-xl cyber-button">
+                        <i class="fas fa-file-code mr-2"></i>Download SVG
+                    </button>
+                </div>
+
+                <!-- History Section -->
+                <div class="mt-6 pt-6 border-t border-[#64ffda]/20">
+                    <h3 class="text-xl font-bold mb-4">
+                        <i class="fas fa-history mr-2"></i>Recent Codes
+                    </h3>
+                    <div id="qrHistory" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"></div>
+                </div>
+            </div>
+
+            <!-- Scan Section -->
+            <div id="scanSection" class="hidden space-y-6">
+                <div class="file-input-wrapper">
+                    <button class="cyber-button rounded-xl py-4 w-full">
+                        <i class="fas fa-upload mr-2"></i>Upload QR Image
+                    </button>
+                    <input type="file" id="qrInput" accept="image/*" class="cyber-input">
+                </div>
+
+                <div id="reader" class="rounded-xl overflow-hidden"></div>
+
+                <!-- Scan Results -->
+                <div id="scanResult" class="hidden">
+                    <div class="bg-[#112240] rounded-xl p-6 space-y-4">
+                        <h3 class="text-2xl font-bold text-[#64ffda]">
+                            <i class="fas fa-check-circle mr-2"></i>Decoded Successfully
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <div class="parsed-result-item">
+                                <div class="text-sm opacity-75">Raw Content</div>
+                                <div id="rawText" class="break-all"></div>
+                            </div>
+                            
+                            <div class="parsed-result-item">
+                                <div class="text-sm opacity-75">Content Type</div>
+                                <div id="parsedResultType" class="font-medium"></div>
+                            </div>
+                            
+                            <div class="parsed-result-item">
+                                <div class="text-sm opacity-75">Formatted Result</div>
+                                <div id="parsedResult" class="space-y-2"></div>
+                            </div>
+                        </div>
+
+                        <button onclick="resetScanner()" 
+                                class="w-full py-3 rounded-xl cyber-button mt-4">
+                            <i class="fas fa-sync mr-2"></i>Scan Another
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <footer class="text-center py-6 text-sm opacity-75">
+        <p>Developed with <i class="fas fa-heart text-red-500"></i> by QR Toolkit Team</p>
+        <p class="mt-2">© 2024 All rights reserved | v2.1.0</p>
+    </footer>
+
     <script>
-        // Enhanced QR generator with new features
         let currentQR = null;
+        let html5QrcodeScanner = null;
         let qrHistory = JSON.parse(localStorage.getItem('qrHistory') || '[]');
 
+        // Tab Management
+        function showTab(tab) {
+            // Toggle active tab styling
+            document.querySelectorAll('[id$="Tab"]').forEach(t => 
+                t.classList.toggle('active', t.id === `${tab}Tab`));
+            
+            // Toggle section visibility
+            document.getElementById('generateSection').style.display = 
+                tab === 'generate' ? 'block' : 'none';
+            document.getElementById('scanSection').style.display = 
+                tab === 'scan' ? 'block' : 'none';
+
+            // Scanner management
+            if (tab === 'scan') {
+                initializeScanner();
+            } else if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().catch(console.debug);
+                html5QrcodeScanner = null;
+            }
+        }
+
+        // QR Generation
         async function generateQR() {
-            const text = document.getElementById('urlInput').value;
-            if (!text) return;
+            const text = document.getElementById('urlInput').value.trim();
+            if (!text) {
+                showError('Please enter some text or URL');
+                return;
+            }
 
             showLoading(true);
             
-            const qrOutput = document.getElementById('qrOutput');
-            qrOutput.innerHTML = '';
-            
-            const config = {
-                text: text,
-                width: 256,
-                height: 256,
-                colorDark: document.getElementById('qrColor').value,
-                colorLight: document.getElementById('bgColor').value,
-                correctLevel: QRCode.CorrectLevel[document.getElementById('errorCorrection').value]
-            };
+            try {
+                const qrOutput = document.getElementById('qrOutput');
+                qrOutput.innerHTML = '';
+                
+                const config = {
+                    text: text,
+                    width: 320,
+                    height: 320,
+                    colorDark: document.getElementById('qrColor').value,
+                    colorLight: document.getElementById('bgColor').value,
+                    correctLevel: QRCode.CorrectLevel[document.getElementById('errorCorrection').value]
+                };
 
-            currentQR = new QRCode(qrOutput, config);
-            
-            // Add logo if uploaded
-            const logoFile = document.getElementById('logoUpload').files[0];
-            if (logoFile) {
-                await addLogoToQR(logoFile);
+                currentQR = new QRCode(qrOutput, config);
+                
+                // Add logo processing
+                const logoFile = document.getElementById('logoUpload').files[0];
+                if (logoFile) await processLogo(logoFile);
+
+                addToHistory();
+                triggerConfetti();
+            } catch (error) {
+                showError('Failed to generate QR code');
+                console.error(error);
+            } finally {
+                showLoading(false);
             }
-
-            // Add to history
-            addToHistory();
-            showLoading(false);
-            triggerConfetti();
         }
 
-        async function addLogoToQR(file) {
+        async function processLogo(file) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const img = new Image();
-                    img.src = e.target.result;
                     img.onload = () => {
                         const canvas = qrOutput.querySelector('canvas');
                         const ctx = canvas.getContext('2d');
                         
-                        // Calculate logo size (20% of QR size)
-                        const logoSize = canvas.width * 0.2;
+                        // Logo positioning
+                        const logoSize = Math.min(canvas.width * 0.2, 100);
                         const x = (canvas.width - logoSize) / 2;
                         const y = (canvas.height - logoSize) / 2;
                         
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.arc(x + logoSize/2, y + logoSize/2, logoSize/2, 0, Math.PI*2);
+                        ctx.clip();
                         ctx.drawImage(img, x, y, logoSize, logoSize);
+                        ctx.restore();
                         resolve();
                     };
+                    img.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
             });
         }
 
+        // Download Handlers
         function downloadQR(format) {
-            if (!currentQR) return;
-            
-            const canvas = qrOutput.querySelector('canvas');
-            const filename = `qr-${Date.now()}.${format}`;
-            
+            if (!currentQR) {
+                showError('No QR code to download');
+                return;
+            }
+
+            const canvas = document.querySelector('#qrOutput canvas');
+            const filename = `QRCode-${Date.now()}.${format}`;
+
             if (format === 'png') {
                 const link = document.createElement('a');
                 link.download = filename;
-                link.href = canvas.toDataURL();
+                link.href = canvas.toDataURL('image/png');
                 link.click();
             } else if (format === 'svg') {
-                // SVG conversion logic here
+                const svgData = canvasToSVG(canvas);
+                const blob = new Blob([svgData], {type: 'image/svg+xml'});
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = url;
+                link.click();
+                URL.revokeObjectURL(url);
             }
         }
 
+        function canvasToSVG(canvas) {
+            const xmlns = 'http://www.w3.org/2000/svg';
+            const svg = document.createElementNS(xmlns, 'svg');
+            svg.setAttribute('width', canvas.width);
+            svg.setAttribute('height', canvas.height);
+            
+            const image = document.createElementNS(xmlns, 'image');
+            image.setAttribute('href', canvas.toDataURL());
+            image.setAttribute('width', '100%');
+            image.setAttribute('height', '100%');
+            
+            svg.appendChild(image);
+            return new XMLSerializer().serializeToString(svg);
+        }
+
+        // History Management
         function addToHistory() {
-            const dataUrl = qrOutput.querySelector('canvas').toDataURL();
+            const canvas = document.querySelector('#qrOutput canvas');
             qrHistory.unshift({
                 text: document.getElementById('urlInput').value,
                 timestamp: new Date().toISOString(),
-                image: dataUrl
+                image: canvas.toDataURL(),
+                colors: {
+                    dark: document.getElementById('qrColor').value,
+                    light: document.getElementById('bgColor').value
+                },
+                correction: document.getElementById('errorCorrection').value
             });
-            
-            // Keep only last 5 items
+
             qrHistory = qrHistory.slice(0, 5);
             localStorage.setItem('qrHistory', JSON.stringify(qrHistory));
             renderHistory();
         }
 
         function renderHistory() {
-            const historyContainer = document.getElementById('qrHistory');
-            historyContainer.innerHTML = qrHistory.map((item, index) => `
-                <div class="relative group cursor-pointer" onclick="loadFromHistory(${index})">
-                    <img src="${item.image}" class="w-full h-auto rounded border border-[#64ffda]/20">
-                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <i class="fas fa-redo text-[#64ffda]"></i>
+            const container = document.getElementById('qrHistory');
+            container.innerHTML = qrHistory.map((item, index) => `
+                <div class="history-item relative group" onclick="loadFromHistory(${index})">
+                    <img src="${item.image}" 
+                         class="w-full h-auto rounded-lg border-2 border-[#64ffda]/20 
+                                transition-all group-hover:border-[#64ffda]/60">
+                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100
+                              transition-opacity flex items-center justify-center rounded-lg">
+                        <i class="fas fa-redo text-2xl text-[#64ffda]"></i>
                     </div>
                 </div>
             `).join('');
         }
 
-        // Enhanced QR parsing
-        function handleScanSuccess(decodedText) {
-            // ... previous parsing logic ...
+        function loadFromHistory(index) {
+            const item = qrHistory[index];
+            if (!item) return;
 
-            // Enhanced content detection
-            let parsedHTML = decodedText;
-            if (isURL(decodedText)) {
-                parsedHTML = `<a href="${decodedText}" target="_blank" class="text-[#64ffda] hover:underline">${decodedText}</a>`;
-            } else if (decodedText.startsWith('WIFI:')) {
-                parsedHTML = parseWifiString(decodedText);
-            } else if (decodedText.startsWith('BEGIN:VCARD')) {
-                parsedHTML = parseVCard(decodedText);
+            document.getElementById('urlInput').value = item.text;
+            document.getElementById('qrColor').value = item.colors.dark;
+            document.getElementById('bgColor').value = item.colors.light;
+            document.getElementById('errorCorrection').value = item.correction;
+            generateQR();
+        }
+
+        // QR Scanning
+        function initializeScanner() {
+            if (html5QrcodeScanner) return;
+
+            html5QrcodeScanner = new Html5Qrcode('reader', {
+                formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE]
+            });
+
+            html5QrcodeScanner.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1
+                },
+                handleScanSuccess,
+                handleScanError
+            ).catch(console.debug);
+
+            document.getElementById('qrInput').addEventListener('change', handleFileUpload);
+        }
+
+        async function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                const result = await html5QrcodeScanner.scanFile(file, true);
+                handleScanSuccess(result);
+            } catch (error) {
+                showError('No QR code found in image');
             }
+        }
 
-            document.getElementById('parsedResult').innerHTML = parsedHTML;
+        function handleScanSuccess(decodedText) {
+            const resultContainer = document.getElementById('scanResult');
+            resultContainer.classList.remove('hidden');
+            
+            document.getElementById('rawText').textContent = decodedText;
+            document.getElementById('parsedResultType').textContent = 
+                detectContentType(decodedText);
+            
+            document.getElementById('parsedResult').innerHTML = 
+                formatContent(decodedText);
+
             triggerConfetti();
+            html5QrcodeScanner.stop();
         }
 
-        function parseVCard(vcard) {
-            // Add vCard parsing logic
-            return vcard.split('\n').map(line => {
+        function detectContentType(text) {
+            if (text.startsWith('WIFI:')) return 'WiFi Credentials';
+            if (text.startsWith('BEGIN:VCARD')) return 'vCard Contact';
+            if (text.match(/^[^:]+:\/\/[^\s]+$/)) return 'URL';
+            if (text.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)) return 'Email';
+            if (text.match(/^(\+\d{1,3}\s?)?\d{10}$/)) return 'Phone Number';
+            return 'Plain Text';
+        }
+
+        function formatContent(text) {
+            const type = detectContentType(text);
+            switch(type) {
+                case 'WiFi Credentials':
+                    return formatWifiCredentials(text);
+                case 'vCard Contact':
+                    return formatVCard(text);
+                case 'URL':
+                    return `<a href="${text}" target="_blank" class="text-[#64ffda] hover:underline">${text}</a>`;
+                case 'Email':
+                    return `<a href="mailto:${text}" class="text-[#64ffda] hover:underline">${text}</a>`;
+                case 'Phone Number':
+                    return `<a href="tel:${text}" class="text-[#64ffda] hover:underline">${text}</a>`;
+                default:
+                    return text;
+            }
+        }
+
+        function formatWifiCredentials(text) {
+            const params = new URLSearchParams(text.substring(5));
+            return `
+                <div class="space-y-2">
+                    <div>SSID: ${params.get('S') || 'N/A'}</div>
+                    <div>Password: ${params.get('P') || 'N/A'}</div>
+                    <div>Security: ${params.get('T') || 'WPA'}</div>
+                </div>
+            `;
+        }
+
+        function formatVCard(text) {
+            const lines = text.split('\n');
+            const contact = {};
+            
+            lines.forEach(line => {
                 const [key, value] = line.split(':');
-                return `<div class="py-1"><span class="text-[#64ffda]">${key}:</span> ${value}</div>`;
-            }).join('');
+                if (key.startsWith('FN')) contact.name = value;
+                if (key.startsWith('TEL')) contact.phone = value;
+                if (key.startsWith('EMAIL')) contact.email = value;
+            });
+
+            return `
+                <div class="space-y-2">
+                    ${contact.name ? `<div>Name: ${contact.name}</div>` : ''}
+                    ${contact.phone ? `<div>Phone: <a href="tel:${contact.phone}" class="text-[#64ffda]">${contact.phone}</a></div>` : ''}
+                    ${contact.email ? `<div>Email: <a href="mailto:${contact.email}" class="text-[#64ffda]">${contact.email}</a></div>` : ''}
+                </div>
+            `;
         }
 
-        // New UI functions
+        function resetScanner() {
+            document.getElementById('scanResult').classList.add('hidden');
+            document.getElementById('qrInput').value = '';
+            initializeScanner();
+        }
+
+        // UI Helpers
         function showLoading(show) {
-            document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
+            document.getElementById('loadingSpinner').style.display = 
+                show ? 'flex' : 'none';
+        }
+
+        function showError(message) {
+            const el = document.createElement('div');
+            el.className = 'fixed bottom-4 right-4 bg-red-600 text-white p-4 rounded-lg shadow-lg';
+            el.textContent = message;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 3000);
         }
 
         function triggerConfetti() {
@@ -225,12 +531,16 @@
                 particleCount: 100,
                 spread: 70,
                 origin: { y: 0.6 },
-                colors: ['#64ffda', '#ff6b6b', '#4ecdc4']
+                colors: ['#64ffda', '#ff6b6b', '#4ecdc4'],
+                disableForReducedMotion: true
             });
         }
 
-        // Initialize history on load
-        renderHistory();
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHistory();
+            showTab('generate');
+        });
     </script>
 </body>
 </html>
